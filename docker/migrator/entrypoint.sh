@@ -13,9 +13,9 @@ done
 
 echo "Database ready!"
 
-# 2: Check DATABASE_URL and access to ./migrations
-if [ -z "$DATABASE_URL" ]; then
-	echo "Error: DATABASE_URL doesn't exists!"
+# 2: Check DB_URL and access to ./migrations
+if [ -z "$DB_URL" ]; then
+	echo "Error: DB_URL doesn't exists!"
 	exit 1
 fi
 
@@ -28,7 +28,7 @@ fi
 
 # 3: Create schema_migrations if doesn't exists
 echo "Check 'schema_migrations' table"
-psql "$DATABASE_URL" << 'EOF'
+psql "$DB_URL" << 'EOF'
 CREATE TABLE IF NOT EXISTS schema_migrations (
 	version VARCHAR(255) PRIMARY KEY,
 	applied_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
@@ -41,20 +41,16 @@ echo "Table 'schema_migrations' ready."
 for file in /migrations/*.sql; do
 	filename=$(basename "$file")
 
-	exists=$(psql "$DATABASE_URL" -tAc "SELECT 1 FROM schema_migrations WHERE version='$filename'")
+	exists=$(psql "$DB_URL" -tAc "SELECT 1 FROM schema_migrations WHERE version='$filename'")
 
 	if [ "$exists" != "1" ]; then
 		echo "Applying $filename"
 
-		psql "$DATABASE_URL" -X -1 << EOF
-		BEGIN;
-		\i $file
-		INSERT INTO schema_migrations (version) VALUES ('$filename');
-		COMMIT;
-		EOF
+		psql "$DB_URL" -X -1 -f "$file"
+
+		psql "$DB_URL" -c "INSERT INTO schema_migrations (version) VALUES ('$filename');"
 
 		echo "Ok: $filename applied successfully"
-		fi
 	else
 		echo "Skipping: $filename already applied"
 	fi
