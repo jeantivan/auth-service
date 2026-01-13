@@ -49,7 +49,7 @@ CREATE TABLE IF NOT EXISTS sessions (
 	created_at TIMESTAMP NOT NULL DEFAULT NOW(),
 	expires_at TIMESTAMP NOT NULL,
 	revoked_at TIMESTAMP
-)
+);
 
 -- user_2fa table: To store information about 2 Factor Authentication of user
 CREATE TABLE IF NOT EXISTS user_2fa (
