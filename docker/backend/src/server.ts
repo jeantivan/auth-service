@@ -2,13 +2,14 @@ import { FastifyInstance, FastifyPluginOptions } from 'fastify';
 import fastifyEnv from '@fastify/env';
 import fastifyJWT from '@fastify/jwt';
 import fastifyPostgres from '@fastify/postgres';
-
 import { schema, type Env } from './env.schema';
 import fastifySensible from '@fastify/sensible';
 import fastifyHelmet from '@fastify/helmet';
 import fastifyCors from '@fastify/cors';
 import fastifyCookie from '@fastify/cookie';
 import fastifyRateLimit from '@fastify/rate-limit';
+import fastifyAutoload from '@fastify/autoload';
+import path from 'node:path'
 
 export async function Server(fastify: FastifyInstance, opts: FastifyPluginOptions) {
 
@@ -44,6 +45,11 @@ export async function Server(fastify: FastifyInstance, opts: FastifyPluginOption
 	// Plugin add utils to work with JSON Web Tokens
 	await fastify.register(fastifyJWT, { secret: fastify.getEnvs<Env>().JWT_SECRET });
 
+	// Register all routes in path ./routes/*
+	await fastify.register(fastifyAutoload, {
+		dir: path.join(__dirname, 'routes'),
+		options: { prefix: ''}
+	})
 }
 
 
