@@ -1,15 +1,34 @@
-import fastify from 'fastify'
+import Fastify from "fastify";
+import { Server } from "./server";
 
-const server = fastify();
-
-server.get("/ping", () => {
-	return 'pooooooong\n';
-})
-
-server.listen({port: 4000, host: '0.0.0.0'}, (err, address) => {
-	if (err) {
-		console.error(err);
-		process.exit(1);
+declare module 'fastify' {
+	interface FastifyInstance {
+		config: {
+			DB_URL: string,
+			JWT_SECRET: string,
+			JWT_EXP: string,
+			REFRESH_TOKEN_EXP: string
+			BACKEND_HOST: string
+			BACKEND_PORT: number
+		}
 	}
-	console.log(`Server listening at ${address}`);
+}
+
+const start = async () => {
+	const fastify = Fastify({
+		trustProxy: true,
+		logger: {
+			level: process.env.NODE_ENV === 'development' ? 'debug' : 'info'
+		}
+	});
+
+	await fastify.register(Server);
+
+	await fastify.listen({ port: Number(process.env.BACKEND_PORT), host: process.env.BACKEND_HOST })
+}
+
+
+start().catch(err => {
+	console.error("Error: " + err);
+	process.exit(1);
 })
