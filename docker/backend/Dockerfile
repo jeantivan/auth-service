@@ -1,5 +1,5 @@
 # STAGE: 1: Build
-FROM node:25-alpine AS base
+FROM node:20-alpine AS base
 
 WORKDIR /app
 
@@ -27,7 +27,7 @@ RUN npm run build
 # Optional: We left only prod dependencies
 RUN npm prune --production
 
-FROM node:25-alpine AS prod
+FROM node:20-alpine AS prod
 
 WORKDIR /app
 
