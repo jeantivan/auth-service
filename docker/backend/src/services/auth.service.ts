@@ -5,7 +5,7 @@ import { LoginInput, LoginResult } from '../domain/auth.types';
 import { RegisterInput, RegisteredUser } from '../domain/user';
 import { findUserByEmail, createUser } from '../repositories/user.repository';
 import { createLocalAuthProvider, findLocalAuthProvider } from '../repositories/auth-provider.repository';
-import { createSession, findSessionByRefreshTokenHash, revokeSession } from '../repositories/session.repository';
+import { createSession, findSessionByRefreshTokenHash, revokeSession, findSessionByRefreshTokenHashAnyState, revokeAllUserSessions } from '../repositories/session.repository';
 import { generateRefreshToken, hashToken } from '../utils/token';
 
 export async function registerUser(
@@ -106,10 +106,15 @@ export async function refreshSession(
 		const session = await findSessionByRefreshTokenHash(client, refreshHash);
 
 		if (!session)
-			throw fastify.httpErrors.unauthorized('Invalid refresh token');
+			throw fastify.httpErrors.unauthorized('INVALID_REFRESH_TOKEN');
+
+		if (session.revoked_at) {
+			await revokeAllUserSessions(client, session.user_id);
+			throw fastify.httpErrors.unauthorized('REFRESH_TOKEN_REUSE_DETECTED');
+		}
 
 		if (new Date(session.expires_at) < new Date()) {
-			throw fastify.httpErrors.unauthorized('Refresh token has expired');
+			throw fastify.httpErrors.unauthorized('REFRESH_TOKEN_EXPIRED');
 		}
 
 		await revokeSession(client, session.id);
@@ -138,6 +143,3 @@ export async function refreshSession(
 		client.release();
 	}
 }
-
-
-
