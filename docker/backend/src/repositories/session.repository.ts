@@ -41,3 +41,24 @@ export async function revokeSession(
 		WHERE id = $1
 	`, [sessionId]);
 }
+
+export async function findSessionByRefreshTokenHashAnyState(client: PoolClient, refreshTokenHash: string) {
+	const  result = await client.query(`
+		SELECT * FROM sessions
+		WHERE refresh_token_hash = $1
+	`, [refreshTokenHash]);
+
+	return result.rows[0] ?? null;
+}
+
+export async function revokeAllUserSessions(
+	client: PoolClient,
+	userId: string
+) {
+	await client.query(`
+		UPDATE sessions
+		SET revoked_at = NOW()
+		WHERE user_id = $1
+		AND revoked_at IS NULL
+	`, [userId]);
+}
