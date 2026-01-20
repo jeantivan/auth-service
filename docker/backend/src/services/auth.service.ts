@@ -5,7 +5,8 @@ import { LoginInput, LoginResult } from '../domain/auth.types';
 import { RegisterInput, RegisteredUser } from '../domain/user';
 import { findUserByEmail, createUser } from '../repositories/user.repository';
 import { createLocalAuthProvider, findLocalAuthProvider } from '../repositories/auth-provider.repository';
-import { createSession } from '../repositories/session.repository';
+import { createSession, findSessionByRefreshTokenHash, revokeSession } from '../repositories/session.repository';
+import { generateRefreshToken, hashToken } from '../utils/token';
 
 export async function registerUser(
 	fastify: FastifyInstance,
@@ -91,3 +92,52 @@ export async function loginUser(
 
 	} finally { client.release(); }
 }
+
+export async function refreshSession(
+	fastify: FastifyInstance,
+	refreshToken: string,
+	meta: { userAgent?: string, ip?: string }
+): Promise<{ accessToken: string, refreshToken: string}> {
+	const client = await fastify.pg.connect();
+
+	try {
+		const refreshHash = hashToken(refreshToken);
+
+		const session = await findSessionByRefreshTokenHash(client, refreshHash);
+
+		if (!session)
+			throw fastify.httpErrors.unauthorized('Invalid refresh token');
+
+		if (new Date(session.expires_at) < new Date()) {
+			throw fastify.httpErrors.unauthorized('Refresh token has expired');
+		}
+
+		await revokeSession(client, session.id);
+
+		const newRefreshToken = generateRefreshToken();
+		const newRefreshHash = hashToken(newRefreshToken);
+
+		await createSession(
+			client,
+			session.user_id,
+			newRefreshHash,
+			meta.userAgent,
+			meta.ip
+		);
+
+		const accessToken = fastify.jwt.sign(
+			{ sub: session.user_id },
+			{ expiresIn: '15m' }
+		);
+
+		return {
+			accessToken,
+			refreshToken: newRefreshToken
+		};
+	} finally {
+		client.release();
+	}
+}
+
+
+

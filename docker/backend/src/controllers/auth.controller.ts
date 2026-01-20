@@ -1,5 +1,5 @@
 import { FastifyReply, FastifyRequest } from "fastify";
-import { registerUser, loginUser } from "../services/auth.service";
+import { registerUser, loginUser, refreshSession } from "../services/auth.service";
 
 export async function registerController(
 	request: FastifyRequest,
@@ -22,4 +22,32 @@ export async function loginController(
 	const result = await loginUser(request.server, request.body as any, meta);
 
 	return reply.send(result);
+}
+
+export async function refreshController(
+	request: FastifyRequest,
+	reply: FastifyReply,
+) {
+	const authHeader = request.headers['authorization'];
+
+	if (!authHeader || !authHeader.startsWith('Bearer ')) {
+		return reply.code(401).send({ message: 'Invalid authorization header' });
+	}
+
+	const refreshToken = authHeader.replace('Bearer ', '');
+
+	try {
+		const result = await refreshSession(
+			request.server,
+			refreshToken,
+			{
+				userAgent: request.headers['user-agent'],
+				ip: request.ip
+			}
+		);
+
+		return reply.send(result);
+	} catch (error: any) {
+		return reply.code(401).send({ message: error.message || 'Unauthorized' });
+	}
 }
