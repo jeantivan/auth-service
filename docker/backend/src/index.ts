@@ -11,6 +11,7 @@ declare module 'fastify' {
 			BACKEND_HOST: string
 			BACKEND_PORT: number
 		}
+		authenticate: any
 	}
 }
 
