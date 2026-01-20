@@ -50,6 +50,12 @@ export async function Server(fastify: FastifyInstance, opts: FastifyPluginOption
 		dir: path.join(__dirname, 'routes'),
 		options: { prefix: ''}
 	})
+
+	// Register all plugins in path ./plugins/*
+	await fastify.register(fastifyAutoload, {
+		dir: path.join(__dirname, 'plugins'),
+		options: {}
+	})
 }
 
 
