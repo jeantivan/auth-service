@@ -143,3 +143,40 @@ export async function refreshSession(
 		client.release();
 	}
 }
+
+
+export async function logoutSession(
+	fastify: FastifyInstance,
+	refreshToken: string
+): Promise<void> {
+	const client = await fastify.pg.connect();
+
+	try {
+		const refreshHash = hashToken(refreshToken);
+
+		const session = await findSessionByRefreshTokenHashAnyState(client, refreshHash);
+
+		if (!session)
+			return;
+
+		if (!session.revoked_at) {
+			await revokeSession(client, session.id);
+		}
+
+	} finally {
+		client.release();
+	}
+}
+
+export async function logoutAllUserSessions(
+	fastify: FastifyInstance,
+	userId: string
+): Promise<void> {
+	const client = await fastify.pg.connect();
+
+	try {
+		await revokeAllUserSessions(client, userId);
+	} finally {
+		client.release();
+	}
+}
