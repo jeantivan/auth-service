@@ -9,6 +9,7 @@ import fastifyCors from '@fastify/cors';
 import fastifyCookie from '@fastify/cookie';
 import fastifyRateLimit from '@fastify/rate-limit';
 import fastifyAutoload from '@fastify/autoload';
+import fastifyCsrfProtection from '@fastify/csrf-protection';
 import path from 'node:path'
 
 export async function Server(fastify: FastifyInstance, opts: FastifyPluginOptions) {
@@ -32,6 +33,9 @@ export async function Server(fastify: FastifyInstance, opts: FastifyPluginOption
 
 	// Handle cookies
 	await fastify.register(fastifyCookie, { secret: fastify.config.COOKIE_SECRET });
+
+	// Register CSRF protection
+	await fastify.register(fastifyCsrfProtection, { cookieOpts: { signed: true }});
 
 	// To add rate-limit to routes
 	await fastify.register(fastifyRateLimit, {
