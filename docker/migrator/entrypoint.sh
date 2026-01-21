@@ -46,15 +46,21 @@ for file in /migrations/*.sql; do
 	if [ "$exists" != "1" ]; then
 		echo "Applying $filename"
 
-		psql "$DB_URL" -X -1 -f "$file"
+		psql "$DB_URL" -v ON_ERROR_STOP=1 -X -1 -f "$file" -c "INSERT INTO schema_migrations (version) VALUES ('$filename');"
 
-		psql "$DB_URL" -c "INSERT INTO schema_migrations (version) VALUES ('$filename');"
-
-		echo "Ok: $filename applied successfully"
+		if [ $? -eq 0 ]; then
+            echo "Ok: $filename applied successfully"
+        else
+            echo "Error: Failed to apply $filename"
+            exit 1
+        fi
 	else
 		echo "Skipping: $filename already applied"
 	fi
 done
 
 echo "Migrations applied"
+echo "Verificando tablas actuales en la base de datos:"
+psql "$DB_URL" -c "\dt"
+
 exit 0
