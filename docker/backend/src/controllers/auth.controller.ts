@@ -68,15 +68,15 @@ export async function logoutController(
 	request: FastifyRequest,
 	reply: FastifyReply,
 ) {
-	const authHeader = request.headers.authorization;
+	const refreshToken = getRefreshToken(request);
 
-	if (!authHeader?.startsWith('Bearer ')) {
-		return reply.code(400).send({ error: 'Missing or invalid Authorization header' });
+	if (!refreshToken) {
+		return reply.code(204).send();
 	}
 
-	const refreshToken = authHeader.replace('Bearer ', '');
-
 	await logoutSession(request.server, refreshToken);
+
+	reply.clearCookie('refreshToken', { path: '/auth/refresh' });
 
 	return reply.code(204).send();
 }
@@ -85,9 +85,19 @@ export async function logoutAllController(
 	request: FastifyRequest,
 	reply: FastifyReply,
 ) {
+	const refreshToken = getRefreshToken(request);
+
+	if (!refreshToken) {
+		return reply.code(204).send();
+	}
+
+	await logoutSession(request.server, refreshToken);
+
 	const userId = (request.user as any).sub;
 
 	await logoutAllUserSessions(request.server, userId);
+
+	reply.clearCookie('refreshToken', { path: '/auth/refresh' });
 
 	return reply.code(204).send();
 }
