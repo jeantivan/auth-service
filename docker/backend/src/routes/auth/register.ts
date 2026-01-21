@@ -15,5 +15,5 @@ export default async function (
 	fastify: FastifyInstance,
 	opts: FastifyPluginOptions
 ) {
-	fastify.post('/register', { schema}, registerController);
+	fastify.post('/register', { schema }, registerController);
 }

@@ -13,5 +13,5 @@ const schema = {
 }
 
 export default async function (fastify: FastifyInstance) {
-	fastify.post('/auth/login', { schema }, loginController);
+	fastify.post('/login', { schema }, loginController);
 }
