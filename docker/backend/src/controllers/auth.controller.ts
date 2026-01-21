@@ -1,5 +1,7 @@
 import { FastifyReply, FastifyRequest } from "fastify";
 import { registerUser, loginUser, refreshSession, logoutSession, logoutAllUserSessions } from "../services/auth.service";
+import { refreshCookieOptions } from "../config/cookies";
+import { getRefreshToken } from "../utils/token";
 
 export async function registerController(
 	request: FastifyRequest,
@@ -19,7 +21,14 @@ export async function loginController(
 		ip: request.ip
 	};
 
+	const clientType = request.headers['x-client-type'] || 'web';
+
 	const result = await loginUser(request.server, request.body as any, meta);
+
+	if (clientType === 'web') {
+		reply.setCookie('refreshToken', result.refreshToken, refreshCookieOptions);
+		return reply.send({ accessToken: result.accessToken });
+	}
 
 	return reply.send(result);
 }
@@ -28,13 +37,11 @@ export async function refreshController(
 	request: FastifyRequest,
 	reply: FastifyReply,
 ) {
-	const authHeader = request.headers['authorization'];
+	const refreshToken = getRefreshToken(request);
 
-	if (!authHeader || !authHeader.startsWith('Bearer ')) {
-		return reply.code(401).send({ message: 'Invalid authorization header' });
+	if (!refreshToken) {
+		return reply.code(400).send({ error: 'Missing refresh token' });
 	}
-
-	const refreshToken = authHeader.replace('Bearer ', '');
 
 	try {
 		const result = await refreshSession(
@@ -45,6 +52,11 @@ export async function refreshController(
 				ip: request.ip
 			}
 		);
+
+		if (!(request.headers['x-client-type'] === 'mobile')) {
+			reply.setCookie('refreshToken', result.refreshToken, refreshCookieOptions);
+			return reply.send({ accessToken: result.accessToken });
+		}
 
 		return reply.send(result);
 	} catch (error: any) {
