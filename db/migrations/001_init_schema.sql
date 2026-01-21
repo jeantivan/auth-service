@@ -29,13 +29,13 @@ CREATE TABLE IF NOT EXISTS users (
 CREATE TABLE IF NOT EXISTS auth_providers (
 	id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
 	user_id UUID REFERENCES users(id) ON DELETE CASCADE,
-	provider AUTH_PROVIDER NOT NULL,
-	provider_uid VARCHAR(255) NOT NULL,
+	provider_type AUTH_PROVIDER NOT NULL,
+	provider_id VARCHAR(255) NOT NULL,
 	password_hash VARCHAR(255),
 	created_at TIMESTAMP NOT NULL DEFAULT NOW(),
 
 	-- A provider identity can belong to only one user
-	CONSTRAINT auth_providers_unique_identity UNIQUE (provider, provider_uid)
+	CONSTRAINT auth_providers_unique_identity UNIQUE (provider_type, provider_id)
 );
 
 
