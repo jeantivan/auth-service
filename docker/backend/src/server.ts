@@ -45,16 +45,17 @@ export async function Server(fastify: FastifyInstance, opts: FastifyPluginOption
 	// Plugin add utils to work with JSON Web Tokens
 	await fastify.register(fastifyJWT, { secret: fastify.getEnvs<Env>().JWT_SECRET });
 
+	// Register all plugins in path ./plugins/*
+	await fastify.register(fastifyAutoload, {
+		dir: path.join(__dirname, 'plugins'),
+		options: {},
+		encapsulate: false
+	})
+
 	// Register all routes in path ./routes/*
 	await fastify.register(fastifyAutoload, {
 		dir: path.join(__dirname, 'routes'),
 		options: { prefix: ''}
-	})
-
-	// Register all plugins in path ./plugins/*
-	await fastify.register(fastifyAutoload, {
-		dir: path.join(__dirname, 'plugins'),
-		options: {}
 	})
 }
 
