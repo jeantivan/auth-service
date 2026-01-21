@@ -7,9 +7,10 @@ declare module 'fastify' {
 			DB_URL: string,
 			JWT_SECRET: string,
 			JWT_EXP: string,
-			REFRESH_TOKEN_EXP: string
-			BACKEND_HOST: string
-			BACKEND_PORT: number
+			REFRESH_TOKEN_EXP: string,
+			HOST: string,
+			PORT: number,
+			COOKIE_SECRET: string
 		}
 		authenticate: any
 	}
@@ -25,7 +26,7 @@ const start = async () => {
 
 	await fastify.register(Server);
 
-	await fastify.listen({ port: Number(process.env.BACKEND_PORT), host: process.env.BACKEND_HOST })
+	await fastify.listen({ port: Number(process.env.PORT), host: process.env.HOST })
 }
 
 
