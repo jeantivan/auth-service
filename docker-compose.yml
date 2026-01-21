@@ -41,7 +41,7 @@ services:
       migrator:
         condition: service_completed_successfully
     env_file:
-      - .env
+      - ./docker/backend/.env
     ports:
       - "4000:4000"
     networks:
@@ -52,7 +52,6 @@ services:
       #- /app/node_modules
     environment:
       - DB_URL=${DB_URL}
-      - NODE_ENV=${NODE_ENV}
 
 volumes:
   db_data:
