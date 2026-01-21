@@ -31,7 +31,7 @@ export async function Server(fastify: FastifyInstance, opts: FastifyPluginOption
 	});
 
 	// Handle cookies
-	await fastify.register(fastifyCookie);
+	await fastify.register(fastifyCookie, { secret: fastify.config.COOKIE_SECRET });
 
 	// To add rate-limit to routes
 	await fastify.register(fastifyRateLimit, {
