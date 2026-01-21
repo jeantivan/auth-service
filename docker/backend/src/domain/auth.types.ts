@@ -6,4 +6,5 @@ export type LoginInput = {
 export type LoginResult = {
 	accessToken: string;
 	refreshToken: string;
+	csrfToken: string;
 }

@@ -18,7 +18,8 @@ export async function loginController(
 ) {
 	const meta = {
 		userAgent: request.headers['user-agent'],
-		ip: request.ip
+		ip: request.ip,
+		csrfToken: reply.generateCsrf()
 	};
 
 	const clientType = request.headers['x-client-type'] || 'web';
@@ -27,7 +28,7 @@ export async function loginController(
 
 	if (clientType === 'web') {
 		reply.setCookie('refreshToken', result.refreshToken, refreshCookieOptions);
-		return reply.send({ accessToken: result.accessToken });
+		return reply.send({ accessToken: result.accessToken, csrfToken: result.csrfToken });
 	}
 
 	return reply.send(result);

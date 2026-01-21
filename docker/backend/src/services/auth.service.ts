@@ -49,7 +49,7 @@ export async function registerUser(
 export async function loginUser(
 	fastify: FastifyInstance,
 	input: LoginInput,
-	meta: { userAgent?: string, ip?: string }
+	meta: { userAgent?: string, ip?: string, csrfToken: string }
 ): Promise<LoginResult> {
 	const email = input.email.toLowerCase();
 	const password = input.password;
@@ -77,17 +77,20 @@ export async function loginUser(
 		const refreshToken = crypto.randomBytes(32).toString('hex');
 		const refreshTokenHash = crypto.createHash('sha256').update(refreshToken).digest('hex');
 
+
 		await createSession(
 			client,
 			auth.user_id,
 			refreshTokenHash,
 			meta.userAgent,
-			meta.ip
+			meta.ip,
+			meta.csrfToken
 		);
 
 		return {
 			accessToken,
-			refreshToken
+			refreshToken,
+			csrfToken: meta.csrfToken
 		}
 
 	} finally { client.release(); }
