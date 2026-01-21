@@ -24,7 +24,7 @@ export async function findLocalAuthProvider(
 		SELECT ap.user_id, ap.password_hash, u.is_active
 		FROM auth_providers ap
 		JOIN users u ON ap.user_id = u.id
-		WHERE ap.provider = 'local'
+		WHERE ap.provider_type = 'local'
 		AND ap.provider_id = $1
 	`, [email]);
 
