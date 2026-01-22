@@ -54,8 +54,23 @@ services:
     environment:
       - DB_URL=${DB_URL}
 
+  frontend:
+    build:
+      context: ./docker/frontend
+    container_name: auth_frontend
+    env_file:
+      - ./docker/frontend/.env
+    ports:
+      - "3000:3000"
+    networks:
+      - auth_net
+    depends_on:
+      backend:
+        condition: service_started
+
 volumes:
   db_data:
 
 networks:
   auth_net:
+    driver: bridge
