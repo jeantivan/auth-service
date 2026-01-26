@@ -14,11 +14,12 @@ export async function findUserByEmail(
 
 export async function createUser(
 	client: PoolClient,
-	email: string
+	email: string,
+	phoneNumber: string | null
 ) {
 	const result = await client.query(
-		'INSERT INTO users (email) VALUES ($1) RETURNING id, email',
-		[email],
+		'INSERT INTO users (email, phone_number, phone_verified) VALUES ($1, $2, false) RETURNING id, email, phone_number',
+		[email, phoneNumber	],
 	);
 	return result.rows[0];
 }

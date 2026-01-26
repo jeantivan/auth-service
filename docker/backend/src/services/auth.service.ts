@@ -3,7 +3,7 @@ import crypto from 'crypto';
 import { FastifyInstance } from 'fastify';
 import { LoginInput, LoginResult } from '../domain/auth.types';
 import { RegisterInput, RegisteredUser } from '../domain/user';
-import { findUserByEmail, createUser } from '../repositories/user.repository';
+import { createUser } from '../repositories/user.repository';
 import { createLocalAuthProvider, findLocalAuthProvider } from '../repositories/auth-provider.repository';
 import { createSession, findSessionByRefreshTokenHash, revokeSession, findSessionByRefreshTokenHashAnyState, revokeAllUserSessions } from '../repositories/session.repository';
 import { generateRefreshToken, hashToken } from '../utils/token';
@@ -15,17 +15,13 @@ export async function registerUser(
 
 	const email = input.email.toLowerCase();
 	const password = input.password;
+	const phoneNumber = input.phoneNumber;
 	const client = await fastify.pg.connect();
 
 	try {
 		await client.query('BEGIN');
 
-		const existingUser = await findUserByEmail(client, email);
-
-		if (existingUser)
-			throw fastify.httpErrors.conflict('Email is already registered');
-
-		const user = await createUser(client, email);
+		const user = await createUser(client, email, phoneNumber);
 
 		const passwordHash = await bcrypt.hash(password, 12);
 
@@ -38,8 +34,16 @@ export async function registerUser(
 		await client.query('COMMIT');
 		return user;
 
-	} catch (err) {
+	} catch (err: any) {
 		await client.query('ROLLBACK');
+		if (err.code === '23505') {
+			if (err.constraint === 'users_unique_email')
+				throw fastify.httpErrors.conflict('EMAIL_ALREADY_EXISTS');
+
+			if (err.constraint === 'users_unique_phone_number')
+				throw fastify.httpErrors.conflict('PHONE_NUMBER_ALREADY_EXISTS');
+		}
+
 		throw err;
 	} finally {
 		client.release();

@@ -3,10 +3,27 @@ import { registerUser, loginUser, refreshSession, logoutSession, logoutAllUserSe
 import { refreshCookieOptions } from "../config/cookies";
 import { getRefreshToken } from "../utils/token";
 
+const PHONE_REGEX = /^\+[1-9]\d{7,14}$/;
+
+function normalizePhoneNumber(phoneNumber: string): string {
+	return phoneNumber.replace(/[\s\-()]/g, '');
+}
+
 export async function registerController(
 	request: FastifyRequest,
 	reply: FastifyReply,
 ) {
+	const { phoneNumber } = request.body as any;
+	let normalizedPhoneNumber: string | null = null;
+
+	if (phoneNumber) {
+		normalizedPhoneNumber = normalizePhoneNumber(phoneNumber);
+		if (!PHONE_REGEX.test(normalizedPhoneNumber)) {
+			return reply.code(400).send({ error: 'Invalid phone number format' });
+		}
+		(request.body as any).phoneNumber = normalizedPhoneNumber;
+	}
+
 	const user = await registerUser(request.server, request.body as any);
 
 	return reply.code(201).send(user);

@@ -7,7 +7,8 @@ const schema = {
 		required: ['email', 'password'],
 		properties: {
 			email: { type: 'string', format: 'email' },
-			password: { type: 'string', minLength: 8, maxLength: 72 }
+			password: { type: 'string', minLength: 8, maxLength: 72 },
+			phoneNumber: { type: 'string' }
 		}
 	}
 }
