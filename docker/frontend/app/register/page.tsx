@@ -66,6 +66,15 @@ export default function RegisterPage() {
             />
           </div>
           <div className="space-y-2">
+            <Label htmlFor="phoneNumber">Phone number</Label>
+            <Input
+              id="phoneNumber"
+              type="tel"
+              placeholder="+1234567890"
+              required
+            />
+          </div>
+          <div className="space-y-2">
             <Label htmlFor="password">Password</Label>
             <Input
               id="password"
