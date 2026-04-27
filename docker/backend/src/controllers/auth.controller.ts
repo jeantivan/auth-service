@@ -39,14 +39,14 @@ export async function loginController(
 		csrfToken: reply.generateCsrf()
 	};
 
-	const clientType = request.headers['x-client-type'] || 'web';
 
 	const result = await loginUser(request.server, request.body as any, meta);
 
-	if (clientType === 'web') {
-		reply.setCookie('refreshToken', result.refreshToken, refreshCookieOptions);
-		return reply.send({ accessToken: result.accessToken, csrfToken: result.csrfToken });
-	}
+	// const clientType = request.headers['x-client-type'] || 'web';
+	// if (clientType === 'web') {
+	// 	reply.setCookie('refreshToken', result.refreshToken, refreshCookieOptions);
+	// 	return reply.send({ accessToken: result.accessToken, csrfToken: result.csrfToken });
+	// }
 
 	return reply.send(result);
 }
@@ -71,10 +71,10 @@ export async function refreshController(
 			}
 		);
 
-		if (!(request.headers['x-client-type'] === 'mobile')) {
-			reply.setCookie('refreshToken', result.refreshToken, refreshCookieOptions);
-			return reply.send({ accessToken: result.accessToken });
-		}
+		// if (!(request.headers['x-client-type'] === 'mobile')) {
+		// 	reply.setCookie('refreshToken', result.refreshToken, refreshCookieOptions);
+		// 	return reply.send({ accessToken: result.accessToken });
+		// }
 
 		return reply.send(result);
 	} catch (error: any) {
@@ -94,7 +94,7 @@ export async function logoutController(
 
 	await logoutSession(request.server, refreshToken);
 
-	reply.clearCookie('refreshToken', { path: '/auth/refresh' });
+	// reply.clearCookie('refreshToken', { path: '/auth/refresh' });
 
 	return reply.code(204).send();
 }
@@ -115,7 +115,7 @@ export async function logoutAllController(
 
 	await logoutAllUserSessions(request.server, userId);
 
-	reply.clearCookie('refreshToken', { path: '/auth/refresh' });
+	// reply.clearCookie('refreshToken', { path: '/auth/refresh' });
 
 	return reply.code(204).send();
 }
