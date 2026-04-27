@@ -11,8 +11,8 @@ export function hashToken(token: string) : string {
 
 export function getRefreshToken(request: FastifyRequest): string | null {
 
-	if (request.cookies?.refreshToken) {
-		return request.cookies.refreshToken;
+	if (request.body && (request.body as any).refreshToken) {
+		return (request.body as any).refreshToken;
 	}
 
 	const authHeader = request.headers.authorization;;
