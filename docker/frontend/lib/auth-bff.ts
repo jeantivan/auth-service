@@ -104,10 +104,45 @@ export async function forwardAuthRequest(
   const responseContentType = backendResponse.headers.get("content-type")
   const rawBody = backendResponse.status === 204 ? null : await backendResponse.text()
 
+
+
   const response = new NextResponse(rawBody, {
     status: backendResponse.status,
     headers: responseContentType ? { "content-type": responseContentType } : undefined,
   })
+
+  if (backendPath === "/auth/login" && backendResponse.ok && rawBody) {
+    try {
+      const data = JSON.parse(rawBody);
+
+      if (data.accessToken) {
+        response.cookies.set({
+           name: "accessToken",
+          value: data.accessToken,
+          httpOnly: true,
+          secure: process.env.NODE_ENV === "production",
+          sameSite: "lax",
+          path: "/",
+          maxAge: 15 * 60,
+        });
+      }
+
+      if (data.refreshToken) {
+        response.cookies.set({
+          name: "refreshToken",
+          value: data.refreshToken,
+          httpOnly: true,
+          secure: process.env.NODE_ENV === "production",
+          sameSite: "strict",
+          path: "/api/auth/refresh",
+          maxAge: 30 * 24 * 60 * 60,
+        });
+      }
+
+    } catch (e) {
+      console.error("Failed to parse login response:", e);
+    }
+  }
 
   const setCookieHeaders = getSetCookieHeaders(backendResponse)
   for (const setCookieHeader of setCookieHeaders) {
