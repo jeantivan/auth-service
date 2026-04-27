@@ -1,9 +1,17 @@
 import { NextResponse } from "next/server";
 
 export async function GET() {
+  const backendApiUrl = process.env.BACKEND_API_URL ?? process.env.NEXT_PUBLIC_API_URL;
+
+  if (!backendApiUrl) {
+    return NextResponse.json(
+      { error: "Backend API URL is not configured" },
+      { status: 500 },
+    );
+  }
 
 	try {
-		const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/ping`, {
+		const res = await fetch(`${backendApiUrl}/ping`, {
 		method: 'GET',
 		headers: {
 			'Content-Type': 'application/json',
