@@ -1,14 +1,6 @@
-import { cookies } from "next/headers"
-import { redirect } from "next/navigation"
+
 
 export default async function DashboardPage() {
-  const cookieStore = await cookies()
-  const refreshToken = cookieStore.get("refreshToken")
-
-  if (!refreshToken?.value) {
-	console.log("No refresh token found, redirecting to login");
-    redirect("/login")
-  }
 
   return (
     <main className="flex min-h-screen items-center justify-center px-4">
