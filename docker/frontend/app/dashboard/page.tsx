@@ -1,3 +1,4 @@
+import { Logout } from "@/components/logout";
 
 
 export default async function DashboardPage() {
@@ -9,6 +10,9 @@ export default async function DashboardPage() {
         <p className="mt-4 text-lg text-muted-foreground">
           Basic message
         </p>
+        <div className="mt-6">
+          <Logout />
+        </div>
       </div>
     </main>
   )
