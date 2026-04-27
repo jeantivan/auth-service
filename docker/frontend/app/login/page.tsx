@@ -1,4 +1,7 @@
-import React from "react"
+"use client"
+
+import React, { useState } from "react"
+import { useRouter } from "next/navigation"
 import { Footer } from "@/components/footer"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -44,7 +47,58 @@ function GoogleIcon(props: React.SVGProps<SVGSVGElement>) {
   )
 }
 
-export default function RegisterPage() {
+type LoginForm = {
+  email: string
+  password: string
+}
+
+export default function LoginPage() {
+  const router = useRouter()
+  const [form, setForm] = useState<LoginForm>({
+    email: "",
+    password: "",
+  })
+  const [error, setError] = useState<string | null>(null)
+  const [isSubmitting, setIsSubmitting] = useState(false)
+
+  const handleChange = (field: keyof LoginForm) =>
+    (event: React.ChangeEvent<HTMLInputElement>) => {
+      setForm((prev) => ({ ...prev, [field]: event.target.value }))
+    }
+
+  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault()
+    setError(null)
+    setIsSubmitting(true)
+
+    try {
+      const response = await fetch("/api/auth/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({
+          email: form.email.trim(),
+          password: form.password,
+        }),
+      })
+
+      if (!response.ok) {
+        const payload = await response.json().catch(() => null)
+        const message =
+          payload?.message || payload?.error || "Failed to login."
+        throw new Error(message)
+      }
+
+      console.log("Login successful, redirecting to dashboard");
+      router.push("/dashboard")
+    } catch (err) {
+      const message = err instanceof Error ? err.message : "Unknown error"
+      setError(message)
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
+
   return (
     <main className="flex min-h-screen flex-col items-center justify-center px-4">
       <div className="w-full max-w-sm space-y-6">
@@ -55,14 +109,17 @@ export default function RegisterPage() {
           </p>
         </div>
 
-        <form className="space-y-4">
+        <form className="space-y-4" onSubmit={handleSubmit}>
           <div className="space-y-2">
             <Label htmlFor="email">Email</Label>
             <Input
               id="email"
               type="email"
+              autoComplete="email"
               placeholder="you@example.com"
               required
+              value={form.email}
+              onChange={handleChange("email")}
             />
           </div>
           <div className="space-y-2">
@@ -70,12 +127,22 @@ export default function RegisterPage() {
             <Input
               id="password"
               type="password"
+              autoComplete="current-password"
               placeholder="Enter your password"
               required
+              value={form.password}
+              onChange={handleChange("password")}
             />
           </div>
-          <Button type="submit" className="w-full">
-            Create account
+
+          {error && (
+            <p className="text-sm text-red-600" role="alert">
+              {error}
+            </p>
+          )}
+
+          <Button type="submit" className="w-full" disabled={isSubmitting}>
+            {isSubmitting ? "Signing in..." : "Login"}
           </Button>
         </form>
 

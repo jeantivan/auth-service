@@ -1,4 +1,7 @@
-import React from "react"
+"use client"
+
+import React, { useState } from "react"
+import { useRouter } from "next/navigation"
 import { Footer } from "@/components/footer"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -44,7 +47,61 @@ function GoogleIcon(props: React.SVGProps<SVGSVGElement>) {
   )
 }
 
+type RegisterForm = {
+  email: string
+  phoneNumber: string
+  password: string
+}
+
 export default function RegisterPage() {
+  const router = useRouter()
+  const [form, setForm] = useState<RegisterForm>({
+    email: "",
+    phoneNumber: "",
+    password: "",
+  })
+  const [error, setError] = useState<string | null>(null)
+  const [isSubmitting, setIsSubmitting] = useState(false)
+
+  const handleChange = (field: keyof RegisterForm) =>
+    (event: React.ChangeEvent<HTMLInputElement>) => {
+      setForm((prev) => ({ ...prev, [field]: event.target.value }))
+    }
+
+  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault()
+    setError(null)
+
+    setIsSubmitting(true)
+
+    try {
+      const response = await fetch("/api/auth/register", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({
+          email: form.email.trim(),
+          password: form.password,
+          phoneNumber: form.phoneNumber.trim() || null,
+        }),
+      })
+
+      if (!response.ok) {
+        const payload = await response.json().catch(() => null)
+        const message =
+          payload?.message || payload?.error || "Failed to create account."
+        throw new Error(message)
+      }
+
+      router.push("/login")
+    } catch (err) {
+      const message = err instanceof Error ? err.message : "Unknown error"
+      setError(message)
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
+
   return (
     <main className="flex min-h-screen flex-col items-center justify-center px-4">
       <div className="w-full max-w-sm space-y-6">
@@ -55,14 +112,17 @@ export default function RegisterPage() {
           </p>
         </div>
 
-        <form className="space-y-4">
+        <form className="space-y-4" onSubmit={handleSubmit}>
           <div className="space-y-2">
             <Label htmlFor="email">Email</Label>
             <Input
               id="email"
               type="email"
+              autoComplete="email"
               placeholder="you@example.com"
               required
+              value={form.email}
+              onChange={handleChange("email")}
             />
           </div>
           <div className="space-y-2">
@@ -70,8 +130,11 @@ export default function RegisterPage() {
             <Input
               id="phoneNumber"
               type="tel"
+              autoComplete="tel"
               placeholder="+1234567890"
               required
+              value={form.phoneNumber}
+              onChange={handleChange("phoneNumber")}
             />
           </div>
           <div className="space-y-2">
@@ -79,12 +142,22 @@ export default function RegisterPage() {
             <Input
               id="password"
               type="password"
+              autoComplete="new-password"
               placeholder="Enter your password"
               required
+              value={form.password}
+              onChange={handleChange("password")}
             />
           </div>
-          <Button type="submit" className="w-full">
-            Create account
+
+          {error && (
+            <p className="text-sm text-red-600" role="alert">
+              {error}
+            </p>
+          )}
+
+          <Button type="submit" className="w-full" disabled={isSubmitting}>
+            {isSubmitting ? "Creating..." : "Create account"}
           </Button>
         </form>
 
