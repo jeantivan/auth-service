@@ -16,6 +16,14 @@ import { Server } from '../../server';
  * ```
  */
 export async function buildTestServer(): Promise<FastifyInstance> {
+  process.env.DB_URL ??= 'postgres://postgres:postgres@localhost:5432/postgres';
+  process.env.JWT_SECRET ??= 'test-jwt-secret';
+  process.env.JWT_EXP ??= '15m';
+  process.env.REFRESH_TOKEN_EXP ??= '7d';
+  process.env.HOST ??= '127.0.0.1';
+  process.env.PORT ??= '4000';
+  process.env.COOKIE_SECRET ??= 'test-cookie-secret';
+
   const fastify = Fastify({
     logger: false,
     trustProxy: true

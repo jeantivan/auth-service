@@ -15,7 +15,7 @@ export function getRefreshToken(request: FastifyRequest): string | null {
 		return (request.body as any).refreshToken;
 	}
 
-	const authHeader = request.headers.authorization;;
+	const authHeader = request.headers?.authorization;
 
 	if (authHeader?.startsWith('Bearer ')) {
 		return authHeader.replace('Bearer ', '');

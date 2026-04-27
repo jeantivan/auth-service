@@ -27,7 +27,7 @@ RUN npm run build
 # Optional: We left only prod dependencies
 RUN npm prune --production
 
-FROM node:20-alpine AS prod
+FROM node:24-alpine AS prod
 
 WORKDIR /app
 
