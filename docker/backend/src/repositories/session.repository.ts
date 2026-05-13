@@ -63,3 +63,16 @@ export async function revokeAllUserSessions(
 		AND revoked_at IS NULL
 	`, [userId]);
 }
+
+export async function findSessionsByUserId(
+	client: PoolClient,
+	userId: string
+) {
+	const result = await client.query(`
+		SELECT 'id', 'user_id', 'created_at', 'user_agent', 'ip_address', 'expires_at', 'revoked_at'
+		FROM sessions
+		WHERE user_id = $1
+	`, [userId]);
+
+	return result.rows;
+}
