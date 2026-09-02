@@ -8,16 +8,16 @@
 
 Antes de tocar el código, necesitamos preparar el entorno para comunicarse con proveedores externos.
 
-*   [ ] **1.1. Obtener Credenciales de Google:**
+*   [ ✅ ] **1.1. Obtener Credenciales de Google:**
     *   Crear un proyecto en Google Cloud Console.
     *   Configurar la pantalla de consentimiento OAuth.
     *   Crear credenciales de "Aplicación Web". Obtener `Client ID` y `Client Secret`.
     *   Configurar URI de redirección autorizada: `http://localhost:3000/api/auth/callback/google` (BFF) o directamente al backend dependiendo de tu arquitectura. Para este plan, haremos que Fastify maneje el callback. URI: `http://localhost:8080/auth/google/callback` (Ajusta los puertos a los tuyos).
-*   [ ] **1.2. Obtener Credenciales de GitHub:**
+*   [ ✅ ] **1.2. Obtener Credenciales de GitHub:**
     *   Ir a GitHub Developer Settings -> OAuth Apps.
     *   Crear nueva aplicación. Obtener `Client ID` y `Client Secret`.
     *   Configurar URL de callback: `http://localhost:8080/auth/github/callback`.
-*   [ ] **1.3. Actualizar Variables de Entorno:**
+*   [ ✅ ] **1.3. Actualizar Variables de Entorno:**
     *   Añadir las 4 variables al archivo `.env` del backend y del frontend (si aplica).
     *   Actualizar `docker/backend/src/env.schema.ts` para que requiera `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`, `GITHUB_CLIENT_ID`, `GITHUB_CLIENT_SECRET` y una `OAUTH_REDIRECT_FRONTEND_URL`.
 
