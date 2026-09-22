@@ -1,4 +1,8 @@
-# 🛡️ AuthCore Boilerplate
+# Handmade project created with the help of AI.
+
+This branch represents my first attempt at this project, so it is currently a work in progress—or perhaps abandoned.
+
+## 🛡️ AuthCore Boilerplate
 
 Un sistema de autenticación y gestión de sesiones robusto, desacoplado y listo para producción. Construido desde cero para ser reutilizable en múltiples proyectos, eliminando la dependencia de librerías "mágicas" de terceros y garantizando el control absoluto sobre el flujo de seguridad y los datos del usuario.
 
