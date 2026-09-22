@@ -1,6 +1,0 @@
-import { FastifyInstance } from "fastify";
-import { refreshController } from "../../controllers/auth.controller";
-
-export default async function (fastify: FastifyInstance) {
-	fastify.post('/refresh', refreshController);
-}
